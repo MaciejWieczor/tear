@@ -1,0 +1,2 @@
+# tear
+CLI Text Editor
