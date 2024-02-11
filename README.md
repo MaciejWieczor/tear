@@ -20,3 +20,9 @@ Needed translations:
 	- maybe a helper to
 		1. move the cursors to the first UTF-8 byte
 		2. 
+
+# Things left to do
+
+## Movement
+- Add tabs to match the tabs in the previous line when pressing 'Enter' and creating
+  a new line

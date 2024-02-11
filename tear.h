@@ -1,3 +1,6 @@
+#ifndef TEAR_HEADER
+#define TEAR_HEADER
+
 #define _DEFAULT_SOURCE
 #define _BSD_SOURCE
 #define _GNU_SOURCE
@@ -28,6 +31,7 @@ typedef struct erow {
 	int rsize;			/* Row rendered size (tabs) */
 	char *chars;			/* String in the line */
 	char *render;			/* String with rendered characters */
+	unsigned char *hl;		/* Highlight map shadowing @render */
 } erow;
 
 struct editorConfig {
@@ -48,7 +52,19 @@ struct editorConfig {
 	char statusmsg[80];		/* Status message string */
 	time_t statusmsg_time;		/* Timestamp to erase after elapsed */
 
+	struct editorSyntax *syntax;	/* Data on filetype and syntax */
 	struct termios orig_termios;	/* Terminal flags etc */
+};
+
+struct abuf {
+	char *b;
+	int len;
+};
+
+struct editorSyntax {
+	char *filetype;
+	char **filematch;
+	int flags;
 };
 
 enum editorKey {
@@ -64,12 +80,14 @@ enum editorKey {
 	PAGE_DOWN
 };
 
-struct abuf {
-	char *b;
-	int len;
+enum editorHighlight {
+	HL_NORMAL = 0,
+	HL_NUMBER,
+	HL_MATCH
 };
 
 #define ABUF_INIT {NULL, 0}
+#define HL_HIGHLIGHT_NUMBERS (1<<0)
 
 /* terminal */
 void die(const char *s);
@@ -117,3 +135,10 @@ void editorProcessKeypress(void);
 
 /* find */
 void editorFind(void);
+
+/* syntax */
+void editorUpdateSyntax(erow *row);
+int editorSyntaxToColor(int hl);
+void editorSelectSyntaxHighlight(void);
+
+#endif /* TEAR_HEADER */

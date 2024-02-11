@@ -8,6 +8,7 @@ void initEditor(void) {
 	E.statusmsg[0] = '\0';
 	E.statusmsg_time = 0;
 	E.filename = NULL;
+	E.syntax = NULL;
 	E.numrows = 0;
 	E.rowoff = 0;
 	E.coloff = 0;

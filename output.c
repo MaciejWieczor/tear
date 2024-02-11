@@ -54,7 +54,29 @@ void editorDrawRows(struct abuf *ab) {
 				len = 0;
 			if (len >= E.screencols)
 				len = E.screencols;
-			abAppend(ab, &E.row[filerow].render[E.coloff], len);
+			char *c = &E.row[filerow].render[E.coloff];
+			unsigned char *hl = &E.row[filerow].hl[E.coloff];
+			int current_color = -1;
+			int j;
+			for (j = 0; j < len; j++) {
+				if (hl[j] == HL_NORMAL) {
+					if (current_color != -1) {
+						abAppend(ab, "\x1b[39m", 5);
+						current_color = -1;
+					}
+					abAppend(ab, &c[j], 1);
+				} else {
+					int color = editorSyntaxToColor(hl[j]);
+					if (color != current_color) {
+						current_color = color;
+						char buf[16];
+						int clen = snprintf(buf, sizeof(buf), "\x1b[%dm", color);
+						abAppend(ab, buf, clen);
+					}
+					abAppend(ab, &c[j], 1);
+				}
+			}
+			abAppend(ab, "\x1b[39m", 5);
 		}
 
 		abAppend(ab, "\x1b[K", 3);
@@ -68,7 +90,8 @@ void editorDrawStatusBar(struct abuf *ab) {
 
 	/* Write the current line over the total number of lines */
 	char rstatus[80];
-	int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", E.cy + 1, E.numrows);
+	int rlen = snprintf(rstatus, sizeof(rstatus), "%s | %d/%d",
+		E.syntax ? E.syntax->filetype : "no ft", E.cy + 1, E.numrows);
 
 	/* Write 20 chars of the filename and the number of lines in the file */
 	char status[80];
